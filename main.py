@@ -81,6 +81,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_DeletePreset.clicked.connect(self.DeletePreset)
         self.btn_LoadPreset.clicked.connect(self.LoadPreset)
 
+
     def ApplyConfig(self):
         self.lineE_SourcePortDir.setText(config['PATHS']['sourceport_executable'])
         self.lineE_ModDir.setText(config['PATHS']['mod_folder'])
@@ -170,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     else:
                         infoBox.warning(self, 'Creating new preset', f'Preset {presetName[0]} already exists!')
                 else:
-                    infoBox.warning(self, 'Creating new preset', f'Can\'t create a preset with no name!\nWrite one!')
+                    infoBox.warning(self, 'Creating new preset', f'Can\'t create a preset with no name!')
         except Exception as E:
             self.statusBar.showMessage(E)
 
