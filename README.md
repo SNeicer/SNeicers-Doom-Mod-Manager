@@ -6,8 +6,19 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - Ability to launch modded/unmodded doom from tray
 - Customizable ui (See wiki for more info)
 
+### Hotkeys
+- Ctrl + S - Save selected preset
+- Ctrl + N - Create new preset
+- Ctrl + D - Delete selected preset
+- Ctrl + L - Load selected preset
+- Ctrl + Up/Down - Increase or decreace selected mod priority
+- Ctrl + Right/Left - Activate or dactivate a mod
+- Ctrl + P - Launch the game
+- Ctrl + R - Refresh mod list
+
+
 ### To Do
-- Hotkeys
+- ~~Hotkeys~~ (Implemented)
 - Make ui more flexible 
 - Additional settings
 - Customizable command prompt
