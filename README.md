@@ -13,7 +13,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - Ctrl + D - Delete selected preset
 - Ctrl + L - Load selected preset
 - Ctrl + Up/Down - Increase or decreace selected mod priority
-- Ctrl + Right/Left - Activate or dactivate a mod
+- Ctrl + Right/Left - Activate or deactivate a mod
 - Ctrl + P - Launch the game
 - Ctrl + R - Refresh mod list
 
