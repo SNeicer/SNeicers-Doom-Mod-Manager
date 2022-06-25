@@ -26,6 +26,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - Additional settings (With saving them to presets)
 - Customizable command prompt
 - Refactor the code according to PEP8 recommendations
+- Make separate utils to use
 - Icons for ui
 - Comments in code for better readability
 - Separate class for QSystemTrayIcon
