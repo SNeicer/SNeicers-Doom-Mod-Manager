@@ -1,7 +1,12 @@
+# SNeicer's Doom Mod Manager #
+# GitHub: https://github.com/SNeicer/SNeicers-Doom-Mod-Manager #
+# Discord: SNeicer#1342 #
+# EMail: b2jnz7hlw@mozmail.com #
+
 import PyQt5.QtCore
 from PyQt5 import QtWidgets, uic, QtGui
 import configparser, sys, glob, os, launchScript, qdarkstyle
-import modListFromFile as mlff
+import presetOperationsScript as pos
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -14,11 +19,14 @@ except Exception as E:
 if config.sections() == []:
     config['PATHS'] = {'sourceport_executable' : 'C:\\Games\\GzDoom\\gzdoom.exe',
                        'mod_folder' : 'C:\\Games\\GzDoom\\Mods'}
+    config['ADDITIONAL'] = {'save_additional' : False, 'save_cprompt' : False}
     with open('config.ini', 'w') as configFile:
         config.write(configFile)
 
-class BreakToNextActiveMod(Exception):
-    pass
+if 'ADDITIONAL' not in config.sections():
+    config['ADDITIONAL'] = {'save_additional': False, 'save_cprompt' : False}
+    with open('config.ini', 'w') as configFile:
+        config.write(configFile)
 
 def showAndHideMainWindow():
     if MWindow.isHidden():
@@ -26,9 +34,15 @@ def showAndHideMainWindow():
     else:
         MWindow.hide()
 
+def getBoolFromString(string):
+    if string == 'False':
+        return False
+    else:
+        return True
+
 @PyQt5.QtCore.pyqtSlot(QtWidgets.QAction)
 def presetChoosed(preset):
-    launchScript.LaunchGame(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'], mlff.getListOfModsFromFile(preset.text()), True)
+    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'], pos.getListOfModsFromFile(preset.text()), True, pos.getAdditionalArgumentsFromFile(preset.text()), pos.getCustomMapAndSkill(preset.text()))
 
 @PyQt5.QtCore.pyqtSlot(QtWidgets.QSystemTrayIcon.ActivationReason)
 def showHideDoubleClick(reason):
@@ -63,6 +77,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
         self.setFixedSize(self.size().width(), self.size().height())
         self.setWindowIcon(QtGui.QIcon('icon.ico'))
+        self.ActiveArgs = []
         self.ApplyConfig()
         self.LoadPresetsInCombobox()
         self.list_Mods.setSortingEnabled(True)
@@ -91,9 +106,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_LoadPreset.clicked.connect(self.LoadPreset)
         self.btn_LoadPreset.setShortcut('ctrl+l')
 
+        #Additional Settings
+        self.check_FastMonsters.clicked.connect(lambda: self.SelectAdditionalArgument('-fast'))
+        self.check_RespawningMonsters.clicked.connect(lambda: self.SelectAdditionalArgument('-respawn'))
+        self.check_NoMonsters.clicked.connect(lambda: self.SelectAdditionalArgument('-nomonsters'))
+        self.check_NoAutoExec.clicked.connect(lambda: self.SelectAdditionalArgument('-noautoexec'))
+        self.check_AVG.clicked.connect(lambda: self.SelectAdditionalArgument('-avg'))
+
+        #Save additional settings checks
+        self.check_SaveAdditional.clicked.connect(self.SetSaveAdditional)
+        self.check_SaveCommandPrompt.clicked.connect(self.SetSaveAdditional)
+
     def ApplyConfig(self):
         self.lineE_SourcePortDir.setText(config['PATHS']['sourceport_executable'])
         self.lineE_ModDir.setText(config['PATHS']['mod_folder'])
+        self.check_SaveAdditional.setChecked(getBoolFromString(config['ADDITIONAL']['save_additional']))
+        self.check_SaveCommandPrompt.setChecked(getBoolFromString(config['ADDITIONAL']['save_cprompt']))
 
     def WriteChangesToConfig(self):
         with open('config.ini', 'w') as configFile:
@@ -105,6 +133,34 @@ class MainWindow(QtWidgets.QMainWindow):
             self.lineE_SourcePortDir.setText(dirToExe[0])
             config['PATHS']['sourceport_executable'] = dirToExe[0]
             self.WriteChangesToConfig()
+
+    def SetSaveAdditional(self):
+        config['ADDITIONAL']['save_additional'] = str(self.check_SaveAdditional.isChecked())
+        config['ADDITIONAL']['save_cprompt'] = str(self.check_SaveCommandPrompt.isChecked())
+        self.WriteChangesToConfig()
+
+    def SelectAdditionalArgument(self, newArg):
+        if newArg in self.ActiveArgs:
+            self.ActiveArgs.remove(newArg)
+        else:
+            self.ActiveArgs.append(newArg)
+
+        self.statusBar.showMessage(f'Current active arguments: {self.ActiveArgs}')
+
+    #REWRITE SOMEHOW!
+    def SetChecksOnAdditionalArgs(self):
+        if '-fast' in self.ActiveArgs:
+            self.check_FastMonsters.setChecked(True)
+        if '-respawn' in self.ActiveArgs:
+            self.check_RespawningMonsters.setChecked(True)
+        if '-nomonsters' in self.ActiveArgs:
+            self.check_NoMonsters.setChecked(True)
+        if '-noautoexec' in self.ActiveArgs:
+            self.check_NoAutoExec.setChecked(True)
+        if '-avg' in self.ActiveArgs:
+            self.check_AVG.setChecked(True)
+
+        self.statusBar.showMessage(f'Current active arguments: {self.ActiveArgs}')
 
     def SetModFolder(self):
         cachedModFolder = self.lineE_ModDir.text()
@@ -144,7 +200,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-
     def SavePreset(self):
         infoBox = QtWidgets.QMessageBox()
         activeCount = self.list_ActiveMods.count()
@@ -153,6 +208,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 for mod in range(activeCount):
                     activeModName = self.list_ActiveMods.item(mod).text()
                     PresetFile.write(f'{activeModName}\n')
+                if config['ADDITIONAL']['save_additional'] == 'True':
+                    if self.gBox_CustomStartMap.isChecked():
+                        PresetFile.write(' #MAP: ')
+                        PresetFile.write(self.tEdit_CustomStartMapName.toPlainText() + '\n')
+                    if self.gBox_CustomDifficulty.isChecked():
+                        PresetFile.write(' #SKILL: ')
+                        skillToWrite = self.cBox_CustomDifficulty.currentText().split('skill ')[1].replace(')', '') + '\n'
+                        PresetFile.write(skillToWrite)
+                    if self.ActiveArgs != []:
+                        PresetFile.write(' #ARGS: ')
+                        for arg in self.ActiveArgs:
+                            PresetFile.write(f'{arg} ')
             infoBox.information(self, 'Saving preset', 'Preset saved successfully!')
         else:
             infoBox.warning(self, 'Saving preset', 'Preset isn\'t selected or there is nothing to save!')
@@ -244,11 +311,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.list_ActiveMods.clear()
             self.RefreshModList()
             if self.cBox_ActivePreset.currentText() != '':
-                modList = mlff.getListOfModsFromFile(self.cBox_ActivePreset.currentText())
+                modList = pos.getListOfModsFromFile(self.cBox_ActivePreset.currentText())
+                argList = pos.getAdditionalArgumentsFromFile(self.cBox_ActivePreset.currentText())
+                cmapAndcskill = pos.getCustomMapAndSkill(self.cBox_ActivePreset.currentText())
+                if len(argList) > 0:
+                    self.ActiveArgs = argList
+                if cmapAndcskill[0] != '':
+                    self.tEdit_CustomStartMapName.setText(cmapAndcskill[0])
+                    self.gBox_CustomStartMap.setChecked(True)
+                if cmapAndcskill[1] != '':
+                    self.gBox_CustomDifficulty.setChecked(True)
+                    self.cBox_CustomDifficulty.setCurrentIndex(int(cmapAndcskill[1]) - 1)
                 for mod in range(len(modList)):
-                    self.list_ActiveMods.addItem(modList[mod])
-                infoBox.information(self, 'Loading preset', f'Preset {self.cBox_ActivePreset.currentText()} is successfully loaded!')
+                    if ' #' not in modList[mod]:
+                        self.list_ActiveMods.addItem(modList[mod])
                 self.DeleteAllActiveModsFromInactiveList()
+                self.SetChecksOnAdditionalArgs()
+                infoBox.information(self, 'Loading preset', f'Preset {self.cBox_ActivePreset.currentText()} is successfully loaded!')
             else:
                 infoBox.warning(self, 'Loading preset', f'There is nothing to load!')
         except Exception as E:
@@ -257,13 +336,55 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def LaunchGame(self):
         modsToLaunchWith = []
+        gettedCmapAndCSkill = [self.tEdit_CustomStartMapName.toPlainText(), self.cBox_CustomDifficulty.currentText().split('skill ')[1].replace(')', '')]
         for mod in range(self.list_ActiveMods.count()):
             modsToLaunchWith.append(self.list_ActiveMods.item(mod).text())
 
+        runCode = 0  # 1 - Only cmap, 2 - Only cskill, 3 - Both
+
+        if self.gBox_CustomStartMap.isChecked() and gettedCmapAndCSkill[0] != '':  # cmap check
+            runCode += 1
+
+        if self.gBox_CustomDifficulty.isChecked() and gettedCmapAndCSkill[1] != '':  # cskill check
+            runCode += 2
+
         if modsToLaunchWith != []:
-            launchScript.LaunchGame(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'], modsToLaunchWith, True)
+            match runCode:
+                case 1:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
+                                                    modsToLaunchWith, True, self.ActiveArgs, [gettedCmapAndCSkill[0], ''])
+                case 2:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
+                                                    modsToLaunchWith, True, self.ActiveArgs, ['', gettedCmapAndCSkill[1]])
+                case 3:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
+                                                    modsToLaunchWith, True, self.ActiveArgs,
+                                                    [gettedCmapAndCSkill[0], gettedCmapAndCSkill[1]])
+                case _:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
+                                                    config['PATHS']['mod_folder'],
+                                                    modsToLaunchWith, True, self.ActiveArgs,
+                                                    ['', ''])
         else:
-            launchScript.LaunchGame(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'], modsToLaunchWith, False)
+            match runCode:
+                case 1:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
+                                                    config['PATHS']['mod_folder'],
+                                                    [], False, self.ActiveArgs, [gettedCmapAndCSkill[0], ''])
+                case 2:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
+                                                    config['PATHS']['mod_folder'],
+                                                    [], False, self.ActiveArgs, ['', gettedCmapAndCSkill[1]])
+                case 3:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
+                                                    config['PATHS']['mod_folder'],
+                                                    [], False, self.ActiveArgs,
+                                                    [gettedCmapAndCSkill[0], gettedCmapAndCSkill[1]])
+                case _:
+                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
+                                                    config['PATHS']['mod_folder'],
+                                                    [], False, self.ActiveArgs,
+                                                    ['', ''])
 
 
 app = QtWidgets.QApplication(sys.argv)
