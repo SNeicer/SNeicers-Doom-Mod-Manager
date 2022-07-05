@@ -23,7 +23,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 ### To Do
 - ~~Hotkeys~~ (Implemented)
 - Make ui more flexible 
-- Additional settings (With saving them to presets)
+- ~~Additional settings (With saving them to presets)~~ (Implemented in PreRelease 1.15)
 - Customizable command prompt
 - Refactor the code according to PEP8 recommendations
 - Make separate utils to use
