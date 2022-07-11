@@ -28,7 +28,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - ~~Refactor the code according to PEP8 recommendations~~ (Implemented in upcoming version 1.2)
 - Icons for ui
 - Comments in code for better readability
-- Separate class for QSystemTrayIcon
+- Multiple languages
 - Autoupdater????
 - Try to make everything more optimized and overall better
 
