@@ -8,6 +8,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - Ability to launch modded/unmodded doom from tray
 - Customizable ui (Use QtDesigner for that, see the wiki for table elements and their names)
 - Hotkeys
+- Advanced settings and saving them into presets
 
 ### Hotkeys
 - Ctrl + S - Save selected preset
@@ -21,21 +22,12 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 
 
 ### To Do
-- ~~Hotkeys~~ (Implemented)
-- Make ui more flexible 
-- Additional settings (With saving them to presets)
-- Customizable command prompt
-- Refactor the code according to PEP8 recommendations
-- Make separate utils to use
-- Icons for ui
-- Comments in code for better readability
-- Separate class for QSystemTrayIcon
-- Autoupdater????
-- Try to make everything more optimized and overall better
+**See master branch for that!**
 
 ### Screenshots
 
-![изображение](https://user-images.githubusercontent.com/46260745/173068286-b18589b1-2936-459e-b1b8-a6e1ccc34ec4.png)
+![изображение](https://user-images.githubusercontent.com/46260745/178277369-7459330b-77af-4549-a82d-69199da1bdb4.png)
+![изображение](https://user-images.githubusercontent.com/46260745/178277403-4173728a-3250-4bb3-bb80-836beca9218a.png)
 ![изображение](https://user-images.githubusercontent.com/46260745/173069188-decf85bb-3b15-4e7f-b57d-8e63b8c58581.png)
 
 <hr>
