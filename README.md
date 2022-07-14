@@ -1,7 +1,7 @@
 # SNeicers Doom Mod Manager
 Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source ports are not tested yet)**
 
-**Upd from 07/05/22 - Pre-release is out!**
+**Upd from 07/14/22 - Version 1.2 is out!**
 
 ### Included features
 - Mod presets
@@ -23,11 +23,11 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 ### To Do
 - ~~Hotkeys~~ (Implemented)
 - Make ui more flexible 
-- ~~Additional settings (With saving them to presets)~~ (Implemented in PreRelease 1.15)
+- ~~Additional settings (With saving them to presets)~~ (Implemented in PreRelease 1.15 and in version 1.2)
 - Customizable command prompt
-- ~~Refactor the code according to PEP8 recommendations~~ (Implemented in upcoming version 1.2)
-- ~~Icons for ui~~ (Implemented in upcoming version 1.2)
-- Comments in code for better readability
+- ~~Refactor the code according to PEP8 recommendations~~ (Implemented version 1.2)
+- ~~Icons for ui~~ (Implemented in version 1.2)
+- ~~Comments in code for better readability~~ (Implemented version 1.2)
 - Multiple languages
 - Autoupdater????
 - Try to make everything more optimized and overall better
@@ -43,3 +43,8 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 Discord: SNeicer#1342
 
 EMail: b2jnz7hlw@mozmail.com
+
+### Copyright (Icons)
+All icons ui icons from <a href="https:\\icons8.com">icons8</a>
+
+Tray icon from <a href="https://www.flaticon.com">flaticon</a>
