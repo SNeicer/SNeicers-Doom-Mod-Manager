@@ -26,7 +26,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - ~~Additional settings (With saving them to presets)~~ (Implemented in PreRelease 1.15)
 - Customizable command prompt
 - ~~Refactor the code according to PEP8 recommendations~~ (Implemented in upcoming version 1.2)
-- Icons for ui
+- ~~Icons for ui~~ (Implemented in upcoming version 1.2)
 - Comments in code for better readability
 - Multiple languages
 - Autoupdater????
