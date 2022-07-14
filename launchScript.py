@@ -1,42 +1,31 @@
 # LaunchGame Script used for launching the game
-# Functions: LaunchGame (Deprecated), LaunchGameAdvanced
+# Functions: LaunchGameAdvanced
 import os
 
-def LaunchGame(gzdoomPath, modPath, mods, IsModded): # - THIS FUNCTION IS GOING TO BE DELETED AFTER PRE-RELEASE! -
-    if IsModded:
-        cPrompt = f'{gzdoomPath} -file '
+
+def launch_game_advanced(gzdoom_path, mod_path, mods, is_modded, a_args, cmap_and_cskill):
+    if is_modded:
+        c_prompt = f'{gzdoom_path} -file '
 
         for mod in mods:
-            cPrompt += f'{modPath}\\{mod} '
+            c_prompt += f'{mod_path}/{mod} '
 
-        os.system(cPrompt)
+        if a_args:
+            for arg in a_args:
+                c_prompt += f'{arg} '
+
+        if cmap_and_cskill[0] != '':
+            c_prompt += f'-warp {cmap_and_cskill[0]} '
+
+        if cmap_and_cskill[1] != '':
+            c_prompt += f'-skill {cmap_and_cskill[1]}'
+
+        print(c_prompt)
+
+        os.system(c_prompt)
     else:
-        cPrompt = f'{gzdoomPath}'
-        os.system(cPrompt)
-
-def LaunchGameAdvanced(gzdoomPath, modPath, mods, IsModded, aArgs, cmapAndCskill): # New launch game function, use this instead of LaunchGame
-    if IsModded:
-        cPrompt = f'{gzdoomPath} -file '
-
-        for mod in mods:
-            cPrompt += f'{modPath}/{mod} '
-
-        if aArgs != []:
-            for arg in aArgs:
-                cPrompt += f'{arg} '
-
-        if cmapAndCskill[0] != '':
-            cPrompt += f'-warp {cmapAndCskill[0]} '
-
-        if cmapAndCskill[1] != '':
-            cPrompt += f'-skill {cmapAndCskill[1]}'
-
-        print(cPrompt)
-
-        os.system(cPrompt)
-    else:
-        cPrompt = f'{gzdoomPath} '
-        for arg in aArgs:
-            cPrompt += f'{arg} '
-        print(cPrompt)
-        os.system(cPrompt)
+        c_prompt = f'{gzdoom_path} '
+        for arg in a_args:
+            c_prompt += f'{arg} '
+        print(c_prompt)
+        os.system(c_prompt)

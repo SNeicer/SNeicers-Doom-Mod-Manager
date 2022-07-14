@@ -59,10 +59,10 @@ def get_bool_from_string(string):
 # Used only at line 506
 @PyQt5.QtCore.pyqtSlot(QtWidgets.QAction)
 def preset_selected(preset):
-    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
-                                    Pos.getListOfModsFromFile(preset.text()), True,
-                                    Pos.getAdditionalArgumentsFromFile(preset.text()),
-                                    Pos.getCustomMapAndSkill(preset.text()))
+    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
+                                      Pos.get_list_of_mods_from_file(preset.text()), True,
+                                      Pos.get_additional_arguments_from_file(preset.text()),
+                                      Pos.get_custom_map_and_skill(preset.text()))
 
 
 # Triggers show_hide_mwindow function after double clicking at tray icon
@@ -95,8 +95,8 @@ def update_tray_menu():
     trma_main_quit.triggered.connect(app.quit)
     trma_main_windowVisibility.triggered.connect(show_hide_mwindow)
     trma_main_launchVanilla.triggered.connect(
-        lambda: launchScript.LaunchGame(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'], [],
-                                        False))
+        lambda: launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
+                                                  [], False, [], ['', '']))
 
 
 # Main Window class witch holds ui and functions to it
@@ -396,9 +396,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.list_ActiveMods.clear()
             self.refresh_mod_list()
             if self.cBox_ActivePreset.currentText() != '':
-                mod_list = Pos.getListOfModsFromFile(self.cBox_ActivePreset.currentText())
-                arg_list = Pos.getAdditionalArgumentsFromFile(self.cBox_ActivePreset.currentText())
-                cmap_andcskill = Pos.getCustomMapAndSkill(self.cBox_ActivePreset.currentText())
+                mod_list = Pos.get_list_of_mods_from_file(self.cBox_ActivePreset.currentText())
+                arg_list = Pos.get_additional_arguments_from_file(self.cBox_ActivePreset.currentText())
+                cmap_andcskill = Pos.get_custom_map_and_skill(self.cBox_ActivePreset.currentText())
                 if len(arg_list) > 0:
                     self.ActiveArgs = arg_list
                 if cmap_andcskill[0] != '':
@@ -439,45 +439,45 @@ class MainWindow(QtWidgets.QMainWindow):
         if mods_to_launch_with:
             match run_code:
                 case 1:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    mods_to_launch_with, True, self.ActiveArgs,
-                                                    [getted_cmap_and_cskill[0], ''])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      mods_to_launch_with, True, self.ActiveArgs,
+                                                      [getted_cmap_and_cskill[0], ''])
                 case 2:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    mods_to_launch_with, True, self.ActiveArgs,
-                                                    ['', getted_cmap_and_cskill[1]])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      mods_to_launch_with, True, self.ActiveArgs,
+                                                      ['', getted_cmap_and_cskill[1]])
                 case 3:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    mods_to_launch_with, True, self.ActiveArgs,
-                                                    [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      mods_to_launch_with, True, self.ActiveArgs,
+                                                      [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]])
                 case _:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    mods_to_launch_with, True, self.ActiveArgs,
-                                                    ['', ''])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      mods_to_launch_with, True, self.ActiveArgs,
+                                                      ['', ''])
         else:
             match run_code:
                 case 1:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    [], False, self.ActiveArgs, [getted_cmap_and_cskill[0], ''])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      [], False, self.ActiveArgs, [getted_cmap_and_cskill[0], ''])
                 case 2:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    [], False, self.ActiveArgs, ['', getted_cmap_and_cskill[1]])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      [], False, self.ActiveArgs, ['', getted_cmap_and_cskill[1]])
                 case 3:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    [], False, self.ActiveArgs,
-                                                    [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      [], False, self.ActiveArgs,
+                                                      [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]])
                 case _:
-                    launchScript.LaunchGameAdvanced(config['PATHS']['sourceport_executable'],
-                                                    config['PATHS']['mod_folder'],
-                                                    [], False, self.ActiveArgs,
-                                                    ['', ''])
+                    launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                                      config['PATHS']['mod_folder'],
+                                                      [], False, self.ActiveArgs,
+                                                      ['', ''])
 
 
 # Making application to launch

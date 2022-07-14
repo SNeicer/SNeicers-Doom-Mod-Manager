@@ -1,22 +1,21 @@
-#
+def get_list_of_mods_from_file(preset_name):
+    with open(f'ModPresets\\{preset_name}.dmmp', 'r') as PresetFile:
+        mods_from_list = PresetFile.readlines()
 
-def getListOfModsFromFile(presetName):
-    with open(f'ModPresets\\{presetName}.dmmp', 'r') as PresetFile:
-        modsFromList = PresetFile.readlines()
+    for mod in mods_from_list:
+        mods_from_list[mods_from_list.index(mod)] = mod.split('\n')[0]
 
-    for mod in modsFromList:
-        modsFromList[modsFromList.index(mod)] = mod.split('\n')[0]
+    mods_from_list = [mod for mod in mods_from_list if ' #' not in mod]
 
-    modsFromList = [mod for mod in modsFromList if ' #' not in mod]
+    return mods_from_list
 
-    return modsFromList
 
-def getAdditionalArgumentsFromFile(presetName):
-    with open(f'ModPresets\\{presetName}.dmmp', 'r') as PresetFile:
-        infoFromFile = PresetFile.readlines()
+def get_additional_arguments_from_file(preset_name):
+    with open(f'ModPresets\\{preset_name}.dmmp', 'r') as PresetFile:
+        info_from_file = PresetFile.readlines()
 
     try:
-        args = infoFromFile[len(infoFromFile)-1].split(' #ARGS: ', 1)[1]
+        args = info_from_file[len(info_from_file)-1].split(' #ARGS: ', 1)[1]
         args = args.split(' ')
         args.pop(len(args) - 1)
     except IndexError:
@@ -24,14 +23,15 @@ def getAdditionalArgumentsFromFile(presetName):
 
     return args
 
-def getCustomMapAndSkill(presetName):
-    with open(f'ModPresets\\{presetName}.dmmp', 'r') as PresetFile:
-        infoFromFile = PresetFile.readlines()
+
+def get_custom_map_and_skill(preset_name):
+    with open(f'ModPresets\\{preset_name}.dmmp', 'r') as PresetFile:
+        info_from_file = PresetFile.readlines()
 
     try:
         cmap = ''
         cskill = ''
-        for line in infoFromFile:
+        for line in info_from_file:
             if ' #MAP: ' in line:
                 cmap = line.split(' #MAP: ')[1].replace('\n', '')
             if ' #SKILL: ' in line:
