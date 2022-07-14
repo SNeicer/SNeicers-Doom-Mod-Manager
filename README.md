@@ -34,7 +34,8 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 
 ### Screenshots
 
-![изображение](https://user-images.githubusercontent.com/46260745/173068286-b18589b1-2936-459e-b1b8-a6e1ccc34ec4.png)
+![изображение](https://user-images.githubusercontent.com/46260745/178967670-97b9a4b0-83c9-49a3-a51e-6e8468c08972.png)
+![изображение](https://user-images.githubusercontent.com/46260745/178967722-564cc3be-00a7-4e99-902c-c54f66a2c1c7.png)
 ![изображение](https://user-images.githubusercontent.com/46260745/173069188-decf85bb-3b15-4e7f-b57d-8e63b8c58581.png)
 
 <hr>
