@@ -1,4 +1,4 @@
-# LaunchGame Script used for launching the game
+# launchScript used for launching the game
 # Functions: LaunchGameAdvanced
 import os
 

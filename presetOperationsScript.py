@@ -1,3 +1,7 @@
+# presetOperationsScript used for reading info from .dmmp files
+# Functions: get_list_of_mods_from_file, get_additional_arguments_from_file, get_custom_map_and_skill
+
+
 def get_list_of_mods_from_file(preset_name):
     with open(f'ModPresets\\{preset_name}.dmmp', 'r') as PresetFile:
         mods_from_list = PresetFile.readlines()
