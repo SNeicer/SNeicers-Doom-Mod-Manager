@@ -54,16 +54,19 @@ sys.excepthook = sdmm_exception_hook
 
 
 # Function to show and hide main mod manager window
-# Used in functions: show_hide_on_doubleclick (Line 89), update_tray_menu (Line 112)
+# Used in functions: show_hide_on_doubleclick, update_tray_menu
 def show_hide_mwindow():
-    if MWindow.isHidden():
-        MWindow.show()
-    else:
-        MWindow.hide()
+    match MWindow.isHidden():
+        case True:
+            MWindow.show()
+        case False:
+            MWindow.hide()
+        case _:
+            MWindow.show()
 
 
 # Self-explanatory...
-# Used in function: apply_config (Line 176 and 177)
+# Used in function: apply_config
 def get_bool_from_string(string):
     if string == 'False':
         return False
@@ -72,7 +75,7 @@ def get_bool_from_string(string):
 
 
 # Function to launch the game with selected preset from tray menu
-# Used only at line 523
+# Used only at line 525
 @PyQt5.QtCore.pyqtSlot(QtWidgets.QAction)
 def preset_selected(preset):
     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
@@ -82,7 +85,7 @@ def preset_selected(preset):
 
 
 # Triggers show_hide_mwindow function after double clicking at tray icon
-# Used only at line 522
+# Used only at line 524
 @PyQt5.QtCore.pyqtSlot(QtWidgets.QSystemTrayIcon.ActivationReason)
 def show_hide_on_doubleclick(reason):
     if reason == QtWidgets.QSystemTrayIcon.DoubleClick:
@@ -90,7 +93,7 @@ def show_hide_on_doubleclick(reason):
 
 
 # Fully updates tray menu by reconstructing it
-# Used in functions: create_new_preset (Line 331), delete_preset (Line 361) and in line 519
+# Used in functions: create_new_preset, delete_preset
 def update_tray_menu():
     trm_main.clear()
     trm_presets.clear()
@@ -107,13 +110,6 @@ def update_tray_menu():
     trm_main.addAction(trma_main_windowVisibility)
     trm_main.addSeparator()
     trm_main.addAction(trma_main_quit)
-
-    trma_main_quit.triggered.connect(app.quit)
-    trma_main_windowVisibility.triggered.connect(show_hide_mwindow)
-    trma_main_launchVanilla.triggered.connect(
-        lambda: launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
-                                                  config['PATHS']['mod_folder'],
-                                                  [], False, [], ['', '']))
 
 
 # Main Window class witch holds ui and functions to it
@@ -169,7 +165,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.presetNameValidator = re.compile(r'^[a-zA-Z0-9_. -]*$')
 
     # Getting values from config
-    # Used in initialization of MainWindow class (Line 128)
+    # Used in initialization of MainWindow class
     def apply_config(self):
         self.lineE_SourcePortDir.setText(config['PATHS']['sourceport_executable'])
         self.lineE_ModDir.setText(config['PATHS']['mod_folder'])
@@ -177,15 +173,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.check_SaveCommandPrompt.setChecked(get_bool_from_string(config['ADDITIONAL']['save_cprompt']))
 
     # Saves changed things in config
-    # Used in functions: set_mod_folder (Line 240), set_save_additional_settings (Line 202)
-    # and in set_sourceport_executable (Line 195)
+    # Used in functions: set_mod_folder, set_save_additional_settings
+    # and in set_sourceport_executable
     @staticmethod
     def write_config_changes():
         with open('config.ini', 'w') as config_file:
             config.write(config_file)
 
     # Getting full path to sourceport executable
-    # Used in initialization of MainWindow class (Line 134)
+    # Used in initialization of MainWindow class
     def set_sourceport_executable(self):
         dir_to_exe = QtWidgets.QFileDialog.getOpenFileName(self, "Select gzdoom executable (gzdoom.exe)", "C:\\",
                                                            "GzDoom (gzdoom.exe)")
@@ -195,14 +191,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.write_config_changes()
 
     # Saving additional settings
-    # Used in initialization of MainWindow class (Line 165, 166)
+    # Used in initialization of MainWindow class
     def set_save_additional_settings(self):
         config['ADDITIONAL']['save_additional'] = str(self.check_SaveAdditional.isChecked())
         config['ADDITIONAL']['save_cprompt'] = str(self.check_SaveCommandPrompt.isChecked())
         self.write_config_changes()
 
     # Adding or removing argument from ActiveArgs list after ui interaction
-    # Used in initialization of MainWindow class (Line 158, 159, 160, 161, 162)
+    # Used in initialization of MainWindow class
     def select_additional_argument(self, new_arg):
         if new_arg in self.ActiveArgs:
             self.ActiveArgs.remove(new_arg)
@@ -211,9 +207,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.statusBar.showMessage(f'Current active arguments: {self.ActiveArgs}')
 
-    # Warning! Yandere dev moment below! Skip to line 233 to end this cringefest!
+    # Warning! Yandere dev moment below! Skip to line 229 to end this cringefest!
     # REWRITE SOMEHOW!
-    # Used in function: load_preset (Line 431)
+    # Used in function: load_preset
     def set_checks_for_additional_arguments(self):
         if '-fast' in self.ActiveArgs:
             self.check_FastMonsters.setChecked(True)
@@ -229,7 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar.showMessage(f'Current active arguments: {self.ActiveArgs}')
 
     # Getting full path to the mod folder
-    # Used in initialization of MainWindow class (Line 135)
+    # Used in initialization of MainWindow class
     def set_mod_folder(self):
         cached_mod_folder = self.lineE_ModDir.text()
         dir_to_mod_folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Select mod folder", 'C:\\',
@@ -242,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.refresh_mod_list()
 
     # Deleting all activated mods from inactive mod list
-    # Used in functions: load_preset (Line 430), refresh_mod_list (Line 406)
+    # Used in functions: load_preset, refresh_mod_list
     def delete_active_from_inactive_mods(self):
         inactive_count = self.list_Mods.count()
         active_count = self.list_ActiveMods.count()
@@ -258,7 +254,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         break
 
     # Activating a mod
-    # Used in initialization of MainWindow class (Line 138)
+    # Used in initialization of MainWindow class
     def activate_mod(self):
         try:
             self.list_ActiveMods.addItem(self.list_Mods.takeItem(self.list_Mods.row(self.list_Mods.selectedItems()[0])))
@@ -266,7 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
     # Deactivating a mod
-    # Used in initialization of MainWindow class (Line 140)
+    # Used in initialization of MainWindow class
     def deactivate_mod(self):
         try:
             self.list_Mods.addItem(
@@ -275,7 +271,7 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
     # Saving all mods and arguments to preset
-    # Used in initialization of MainWindow class (Line 150)
+    # Used in initialization of MainWindow class
     def save_preset(self):
         info_box = QtWidgets.QMessageBox()
         active_count = self.list_ActiveMods.count()
@@ -302,8 +298,8 @@ class MainWindow(QtWidgets.QMainWindow):
             info_box.warning(self, 'Saving preset', 'Preset isn\'t selected or there is nothing to save!')
 
     # Loading all names of existing presets from ModPresets folder
-    # Used in initialization of MainWindow class (Line 129)
-    # Used in functions: create_new_preset (Line 327), delete_preset (Line 358)
+    # Used in initialization of MainWindow class
+    # Used in functions: create_new_preset, delete_preset
     def load_presets_in_cbox(self):
         presets = glob.glob('*.dmmp', root_dir='ModPresets\\')
         self.cBox_ActivePreset.clear()
@@ -312,7 +308,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.cBox_ActivePreset.addItem(preset.split('.dmmp')[0])
 
     # Creating a new preset file with custom name
-    # Used in initialization of MainWindow class (Line 148)
+    # Used in initialization of MainWindow class
     def create_new_preset(self):
         try:
             info_box = QtWidgets.QMessageBox()
@@ -341,7 +337,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar.showMessage(ex)
 
     # Fully deleting preset from existence
-    # Used in initialization of MainWindow class (Line 152)
+    # Used in initialization of MainWindow class
     def delete_preset(self):
         try:
             info_box = QtWidgets.QMessageBox()
@@ -367,7 +363,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar.showMessage(ex)
 
     # Upping mod priority in active mods list
-    # Used in initialization of MainWindow class (Line 144)
+    # Used in initialization of MainWindow class
     def up_mod_priority(self):
         try:
             selected_mod_row = self.list_ActiveMods.currentRow()
@@ -379,7 +375,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar.showMessage(ex)
 
     # Lowering mod priority in active mods list
-    # Used in initialization of MainWindow class (Line 146)
+    # Used in initialization of MainWindow class
     def lower_mod_priority(self):
         try:
             selected_mod_row = self.list_ActiveMods.currentRow()
@@ -391,8 +387,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar.showMessage(ex)
 
     # Refreshing list of inactive mods and deleting all active mods from inactive list
-    # Used in initialization of MainWindow class (Line 131, 136)
-    # Used in functions: load_preset (Line 414), set_mod_folder (Line 242)
+    # Used in initialization of MainWindow class
+    # Used in functions: load_preset, set_mod_folder
     def refresh_mod_list(self):
         if config['PATHS']['mod_folder'] is not None:
             all_pk_threes = glob.glob('*.pk3', root_dir=config['PATHS']['mod_folder'])
@@ -406,7 +402,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.delete_active_from_inactive_mods()
 
     # Loading mods and arguments from a preset file
-    # Used in initialization of MainWindow class (Line 154)
+    # Used in initialization of MainWindow class
     def load_preset(self):
         try:
             info_box = QtWidgets.QMessageBox()
@@ -437,7 +433,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar.showMessage(ex)
 
     # Launching game with currently selected in ui mods and arguments
-    # Used in initialization of MainWindow class (Line 142)
+    # Used in initialization of MainWindow class
     def launch_game(self):
         mods_to_launch_with = []
         getted_cmap_and_cskill = [self.tEdit_CustomStartMapName.toPlainText(),
@@ -519,6 +515,12 @@ trma_main_launchVanilla = QtWidgets.QAction("Launch vanilla (no mods)")
 update_tray_menu()
 
 # Connecting events to functions, setting a context menu for tray icon and making it visible
+trma_main_quit.triggered.connect(app.quit)
+trma_main_windowVisibility.triggered.connect(show_hide_mwindow)
+trma_main_launchVanilla.triggered.connect(
+    lambda: launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
+                                              config['PATHS']['mod_folder'],
+                                              [], False, [], ['', '']))
 trayApp.activated.connect(show_hide_on_doubleclick)
 trm_presets.triggered.connect(preset_selected)
 trayApp.setContextMenu(trm_main)
