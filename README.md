@@ -31,7 +31,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - ~~Comments in code for better readability~~ (Implemented in version 1.2)
 - ~~Multiple languages~~ (Implemented in final version 1.3)
 - ~~Autoupdater????~~ (No need)
-- ~~Try to make everything more optimized and overall better~~ (i did what i could xd )
+- ~~Try to make everything more optimized and overall better~~ (i did what i could xd)
 
 ### Screenshots
 
