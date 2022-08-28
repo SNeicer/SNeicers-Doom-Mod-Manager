@@ -16,6 +16,8 @@ import datetime
 import resources
 import presetOperationsScript as Pos
 import sys
+import importlib
+import traceback as tbacks
 
 config = configparser.ConfigParser()
 config.read('config.ini')  # Reading config
@@ -29,12 +31,17 @@ except WindowsError as E:
 if not config.sections():  # If config is empty, fill it with default values
     config['PATHS'] = {'sourceport_executable': 'C:\\Games\\GzDoom\\gzdoom.exe',
                        'mod_folder': 'C:\\Games\\GzDoom\\Mods'}
-    config['ADDITIONAL'] = {'save_additional': False, 'save_cprompt': False}
+    config['ADDITIONAL'] = {'save_additional': False, 'save_cprompt': False, 'language': 'English'}
     with open('config.ini', 'w') as configFile:
         config.write(configFile)
 
 if 'ADDITIONAL' not in config.sections():  # If config is from an older version, add new additional settings to it
-    config['ADDITIONAL'] = {'save_additional': False, 'save_cprompt': False}
+    config['ADDITIONAL'] = {'save_additional': False, 'save_cprompt': False, 'language': 'English'}
+    with open('config.ini', 'w') as configFile:
+        config.write(configFile)
+
+if 'language' not in config['ADDITIONAL']:  # If config is from an older version, add new language setting
+    config['ADDITIONAL']['language'] = 'English'
     with open('config.ini', 'w') as configFile:
         config.write(configFile)
 
@@ -42,10 +49,12 @@ if 'ADDITIONAL' not in config.sections():  # If config is from an older version,
 # Custom exception hook that will display critical errors and write log files
 def sdmm_exception_hook(exctype, value, traceback):
     MWindow.show()
+    # print(tbacks.format_exc(traceback)) - Only for code debugging
     with open('Error log from ' + str(datetime.date.today()) + '.log', mode='w') as log_file:
-        log_file.write(f'exctype: {exctype}\nvalue: {value}\ntraceback: {traceback}\n')
+        log_file.write(f'exctype: {exctype}\nvalue: {value}\ntraceback: {tbacks.format_exc()}\n')
     info_box = QtWidgets.QMessageBox()
-    info_box.critical(MWindow, 'Error!', f'Type: {exctype}\nValue: {value}\nTraceback: {traceback}\n\nError log file '
+    info_box.critical(MWindow, 'Error!', f'Type: {exctype}\nValue: {value}\nTraceback: {tbacks.format_exc()}\n\nError '
+                                         f'log file '
                                          f'created! Report this by creating a new issue on github!')
 
 
@@ -81,7 +90,8 @@ def preset_selected(preset):
     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'], config['PATHS']['mod_folder'],
                                       Pos.get_list_of_mods_from_file(preset.text()), True,
                                       Pos.get_additional_arguments_from_file(preset.text()),
-                                      Pos.get_custom_map_and_skill(preset.text()))
+                                      Pos.get_custom_map_and_skill(preset.text()),
+                                      Pos.get_extra_args(preset.text()))
 
 
 # Triggers show_hide_mwindow function after double clicking at tray icon
@@ -112,12 +122,23 @@ def update_tray_menu():
     trm_main.addAction(trma_main_quit)
 
 
+def update_tray_menu_localization():
+    trm_presets.setTitle(MWindow.lang.trayMenu_launchFromPreset)
+    trma_main_quit.setText(MWindow.lang.trayMenu_quit)
+    trma_main_windowVisibility.setText(MWindow.lang.trayMenu_showHideManager)
+    trma_main_launchVanilla.setText(MWindow.lang.trayMenu_launchVanilla)
+
+
 # Main Window class witch holds ui and functions to it
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         uic.loadUi("Main.ui", self)  # Loading ui file
         self.show()
+        self.lang = self.startload_localization()
+        self.apply_localization(False)
+        self.reload_language_cbox()
+        self.set_cbox_locale_label()
         self.setFixedSize(self.size().width(), self.size().height())  # Making window unresizable (For now...)
         self.setWindowIcon(QtGui.QIcon('icon.ico'))
         self.ActiveArgs = []  # Var that stores launch arguments
@@ -149,6 +170,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_DeletePreset.setShortcut('ctrl+d')
         self.btn_LoadPreset.clicked.connect(self.load_preset)
         self.btn_LoadPreset.setShortcut('ctrl+l')
+        self.cBox_language.currentTextChanged.connect(self.load_localization)
 
         # Additional Settings
         self.check_FastMonsters.clicked.connect(lambda: self.select_additional_argument('-fast'))
@@ -172,8 +194,84 @@ class MainWindow(QtWidgets.QMainWindow):
         self.check_SaveAdditional.setChecked(get_bool_from_string(config['ADDITIONAL']['save_additional']))
         self.check_SaveCommandPrompt.setChecked(get_bool_from_string(config['ADDITIONAL']['save_cprompt']))
 
+    # Resetting contents of language combo box to existing ones
+    # Used in initialization of MainWindow class
+    def reload_language_cbox(self):
+        self.cBox_language.clear()
+        existing_localizations = glob.glob('*.py', root_dir='localization\\')
+        for locale in range(0, len(existing_localizations)):
+            splitted_locale_name = existing_localizations[locale].split('.py')[0]
+            self.cBox_language.addItem(splitted_locale_name)
+
+    # Trying to load localization from config
+    # if localization doesn't exist anymore, triggering failsafe and reverting back to english
+    # Used in initialization of MainWindow class
+    def startload_localization(self):
+        info_box = QtWidgets.QMessageBox()
+        if os.path.exists(f"localization/{config['ADDITIONAL']['language']}.py"):
+            return importlib.import_module(f"localization.{config['ADDITIONAL']['language']}")
+        else:
+            info_box.critical(self, 'Error!', 'Localization file not found! Reverting back to English!')
+            config['ADDITIONAL']['language'] = 'English'
+            self.write_config_changes()
+            return importlib.import_module('localization.English')
+
+    # Loads up new localization variables to use
+    # Used in initialization of MainWindow class
+    def load_localization(self):
+        info_box = QtWidgets.QMessageBox()
+        if os.path.exists(f"localization/{self.cBox_language.currentText()}.py") and config['ADDITIONAL']['language'] != self.cBox_language.currentText():
+            try:
+                self.lang = importlib.import_module(f"localization.{self.cBox_language.currentText()}")
+                config['ADDITIONAL']['language'] = self.cBox_language.currentText()
+                self.write_config_changes()
+                self.apply_localization(True)
+            except:
+                info_box.critical(self, 'Error!', 'Localization file failed importing! Reverting back to English!')
+                self.lang = importlib.import_module('localization.English')
+        else:
+            info_box.critical(self, 'Error!', 'Localization file not found! Reverting back to English!')
+            self.lang = importlib.import_module('localization.English')
+
+    # Applies localization variables to texts
+    # Used in function load_localization and in initialization of MainWindow class
+    def apply_localization(self, update_menu):
+        self.label_SourcePortDir.setText(self.lang.mainUi_sourceLabel)
+        self.btn_BrowseModDir.setText(self.lang.mainUi_browseBtn)
+        self.btn_BrowseSourcePortDir.setText(self.lang.mainUi_browseBtn)
+        self.label_ModDir.setText(self.lang.mainUi_modDirLabel)
+        self.tabw_MainTabs.setTabText(self.tabw_MainTabs.indexOf(self.tab), self.lang.mainUi_mainTab)
+        self.check_AVG.setText(self.lang.addiUi_avgCheck)
+        self.check_FastMonsters.setText(self.lang.addiUi_fmonCheck)
+        self.check_NoMonsters.setText(self.lang.addiUi_nomonCheck)
+        self.check_RespawningMonsters.setText(self.lang.addiUi_respmonCheck)
+        self.check_NoAutoExec.setText(self.lang.addiUi_dissableAExecCheck)
+        self.gBox_CustomStartMap.setTitle(self.lang.addiUi_customMapGroupBox)
+        self.label_CustomMapName.setText(self.lang.addiUi_customMapLabel)
+        self.gBox_CustomDifficulty.setTitle(self.lang.addiUi_customDifficultyGroupBox)
+        self.label_CustomDifficulty.setText(self.lang.addiUi_customDifficultyLabel)
+        self.label_CommandPrompt.setText(self.lang.addiUi_extraParamsLabel)
+        self.check_SaveAdditional.setText(self.lang.addiUi_saveAdditionalSettingsCheck)
+        self.check_SaveCommandPrompt.setText(self.lang.addiUi_saveExtraParamsCheck)
+        self.tabw_MainTabs.setTabText(self.tabw_MainTabs.indexOf(self.tab_2), self.lang.mainUi_additionalTab)
+        self.btn_LoadPreset.setText(self.lang.mainUi_loadPresetBtn)
+        self.btn_SavePreset.setText(self.lang.mainUi_savePresetBtn)
+        self.label_Preset.setText(self.lang.mainUi_presetLabel)
+        self.label_language.setText(self.lang.mainUi_languageLabel)
+        if update_menu:
+            update_tray_menu_localization()
+
+    # Updates combobox to match saved language in config
+    # Used in initialization of MainWindow class
+    def set_cbox_locale_label(self):
+        found_index = self.cBox_language.findText(config['ADDITIONAL']['language'])
+        if found_index != -1:
+            self.cBox_language.setCurrentIndex(found_index)
+        else:
+            self.cBox_language.setCurrentIndex(0)
+
     # Saves changed things in config
-    # Used in functions: set_mod_folder, set_save_additional_settings
+    # Used in functions: set_mod_folder, set_save_additional_settings, load_localization
     # and in set_sourceport_executable
     @staticmethod
     def write_config_changes():
@@ -183,7 +281,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # Getting full path to sourceport executable
     # Used in initialization of MainWindow class
     def set_sourceport_executable(self):
-        dir_to_exe = QtWidgets.QFileDialog.getOpenFileName(self, "Select gzdoom executable (gzdoom.exe)", "C:\\",
+        dir_to_exe = QtWidgets.QFileDialog.getOpenFileName(self, self.lang.fileDialog_setGzDoom, "C:\\",
                                                            "GzDoom (gzdoom.exe)")
         if dir_to_exe[0] != '':
             self.lineE_SourcePortDir.setText(dir_to_exe[0])
@@ -205,9 +303,8 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.ActiveArgs.append(new_arg)
 
-        self.statusBar.showMessage(f'Current active arguments: {self.ActiveArgs}')
+        self.statusBar.showMessage(f'{self.lang.statusBar_curArgs}{self.ActiveArgs}')
 
-    # Warning! Yandere dev moment below! Skip to line 229 to end this cringefest!
     # REWRITE SOMEHOW!
     # Used in function: load_preset
     def set_checks_for_additional_arguments(self):
@@ -222,13 +319,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if '-avg' in self.ActiveArgs:
             self.check_AVG.setChecked(True)
 
-        self.statusBar.showMessage(f'Current active arguments: {self.ActiveArgs}')
+        self.statusBar.showMessage(f'{self.lang.statusBar_curArgs}{self.ActiveArgs}')
 
     # Getting full path to the mod folder
     # Used in initialization of MainWindow class
     def set_mod_folder(self):
         cached_mod_folder = self.lineE_ModDir.text()
-        dir_to_mod_folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Select mod folder", 'C:\\',
+        dir_to_mod_folder = QtWidgets.QFileDialog.getExistingDirectory(self, self.lang.fileDialog_setModFolder, 'C:\\',
                                                                        QtWidgets.QFileDialog.ShowDirsOnly)
         if dir_to_mod_folder != '' and dir_to_mod_folder != cached_mod_folder:
             self.lineE_ModDir.setText(dir_to_mod_folder)
@@ -250,7 +347,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     inactive_mod_name = self.list_Mods.item(inactiveMod).text()
                     if active_mod_name == inactive_mod_name:
                         self.list_Mods.takeItem(inactiveMod)
-                        self.statusBar.showMessage('Deleting activated mods from inactive mod list...')
+                        self.statusBar.showMessage(self.lang.statusBar_deletingMods)
                         break
 
     # Activating a mod
@@ -280,6 +377,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 for mod in range(active_count):
                     active_mod_name = self.list_ActiveMods.item(mod).text()
                     PresetFile.write(f'{active_mod_name}\n')
+                if config['ADDITIONAL']['save_cprompt'] == 'True':
+                    PresetFile.write(' #EXTRA: ')
+                    PresetFile.write(self.tEdit_CustomCommandPrompt.toPlainText() + '\n')
                 if config['ADDITIONAL']['save_additional'] == 'True':
                     if self.gBox_CustomStartMap.isChecked():
                         PresetFile.write(' #MAP: ')
@@ -293,9 +393,9 @@ class MainWindow(QtWidgets.QMainWindow):
                         PresetFile.write(' #ARGS: ')
                         for arg in self.ActiveArgs:
                             PresetFile.write(f'{arg} ')
-            info_box.information(self, 'Saving preset', 'Preset saved successfully!')
+            info_box.information(self, self.lang.infoBox_savingPresetTitle, self.lang.infoBox_savingPresetText)
         else:
-            info_box.warning(self, 'Saving preset', 'Preset isn\'t selected or there is nothing to save!')
+            info_box.warning(self, self.lang.infoBox_savingPresetTitle, self.lang.infoBox_savingPresetErrorText)
 
     # Loading all names of existing presets from ModPresets folder
     # Used in initialization of MainWindow class
@@ -312,27 +412,28 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_new_preset(self):
         try:
             info_box = QtWidgets.QMessageBox()
-            preset_name = QtWidgets.QInputDialog.getText(self, 'Creating new preset', 'Name your new preset:',
+            preset_name = QtWidgets.QInputDialog.getText(self, self.lang.inputDialog_newPresetTitle,
+                                                         self.lang.inputDialog_newPresetText,
                                                          QtWidgets.QLineEdit.Normal, '')
             if preset_name[1]:
-                if preset_name[0] != '':
+                if preset_name[0] != '' and preset_name[0][0] != '.':
                     if not os.path.exists(f'ModPresets\\{preset_name[0]}.dmmp'):
                         if re.match(self.presetNameValidator, preset_name[0]) is not None:
                             with open(f'ModPresets\\{preset_name[0]}.dmmp', 'w'):
                                 pass
                             self.load_presets_in_cbox()
                             self.cBox_ActivePreset.setCurrentIndex(self.cBox_ActivePreset.findText(preset_name[0]))
-                            info_box.information(self, 'Creating new preset',
-                                                 f'Preset {preset_name[0]} is successfully created!')
+                            info_box.information(self, self.lang.infoBox_newPresetTitle,
+                                                 self.lang.infoBox_newPresetCreatedText.format(pname=preset_name[0]))
                             update_tray_menu()
                         else:
-                            info_box.warning(self, 'Creating new preset',
-                                             'Invalid name!\nUse only letters from A to Z and characters "-", "_", '
-                                             '" ", "."!')
+                            info_box.warning(self, self.lang.infoBox_newPresetTitle,
+                                             self.lang.infoBox_newPresetRegexErrorText)
                     else:
-                        info_box.warning(self, 'Creating new preset', f'Preset {preset_name[0]} already exists!')
+                        info_box.warning(self, self.lang.infoBox_newPresetTitle,
+                                         self.lang.infoBox_newPresetAlrExists.format(pname=preset_name[0]))
                 else:
-                    info_box.warning(self, 'Creating new preset', f'Can\'t create a preset with no name!')
+                    info_box.warning(self, self.lang.infoBox_newPresetTitle, self.lang.infoBox_newPresetNoNameError)
         except Exception as ex:
             self.statusBar.showMessage(ex)
 
@@ -344,21 +445,21 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.cBox_ActivePreset.currentText() != '':
                 preset_temp_name = self.cBox_ActivePreset.currentText()
                 sure_box = QtWidgets.QMessageBox()
-                sure_box_result = sure_box.question(self, 'Deleting preset',
-                                                    f'Are you sure to delete {preset_temp_name} preset?',
+                sure_box_result = sure_box.question(self, self.lang.messageBox_delPresetTitle,
+                                                    self.lang.messageBox_delPresetText.format(pname=preset_temp_name),
                                                     sure_box.Yes | sure_box.No)
 
                 if sure_box_result == sure_box.Yes:
                     try:
                         os.remove(f'ModPresets\\{preset_temp_name}.dmmp')
                         self.load_presets_in_cbox()
-                        info_box.information(self, 'Deleting preset',
-                                             f'Preset {preset_temp_name} is successfully deleted!')
+                        info_box.information(self, self.lang.infoBox_delPresetTitle,
+                                             self.lang.infoBox_delPresetSucText.format(pname=preset_temp_name))
                         update_tray_menu()
                     except Exception as ex:
                         self.statusBar.showMessage(ex)
             else:
-                info_box.warning(self, 'Deleting preset', 'There is nothing to delete!')
+                info_box.warning(self, self.lang.infoBox_delPresetTitle, self.lang.infoBox_delPresetNothingText)
         except Exception as ex:
             self.statusBar.showMessage(ex)
 
@@ -412,6 +513,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 mod_list = Pos.get_list_of_mods_from_file(self.cBox_ActivePreset.currentText())
                 arg_list = Pos.get_additional_arguments_from_file(self.cBox_ActivePreset.currentText())
                 cmap_andcskill = Pos.get_custom_map_and_skill(self.cBox_ActivePreset.currentText())
+                extra_args = Pos.get_extra_args(self.cBox_ActivePreset.currentText())
                 if len(arg_list) > 0:
                     self.ActiveArgs = arg_list
                 if cmap_andcskill[0] != '':
@@ -420,17 +522,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 if cmap_andcskill[1] != '':
                     self.gBox_CustomDifficulty.setChecked(True)
                     self.cBox_CustomDifficulty.setCurrentIndex(int(cmap_andcskill[1]) - 1)
+                if extra_args != '':
+                    self.tEdit_CustomCommandPrompt.setPlainText(extra_args)
                 for mod in range(len(mod_list)):
                     if ' #' not in mod_list[mod]:
                         self.list_ActiveMods.addItem(mod_list[mod])
                 self.delete_active_from_inactive_mods()
                 self.set_checks_for_additional_arguments()
-                info_box.information(self, 'Loading preset',
-                                     f'Preset {self.cBox_ActivePreset.currentText()} is successfully loaded!')
+                info_box.information(self, self.lang.infoBox_loadPresetTitle,
+                                     self.lang.infoBox_loadPresetSucText.format(pname=self.cBox_ActivePreset.currentText()))
             else:
-                info_box.warning(self, 'Loading preset', f'There is nothing to load!')
+                info_box.warning(self, self.lang.infoBox_loadPresetTitle, self.lang.infoBox_loadPresetNothingText)
         except Exception as ex:
-            self.statusBar.showMessage(ex)
+            self.statusBar.showMessage("ERROR! " + str(ex))
 
     # Launching game with currently selected in ui mods and arguments
     # Used in initialization of MainWindow class
@@ -438,6 +542,7 @@ class MainWindow(QtWidgets.QMainWindow):
         mods_to_launch_with = []
         getted_cmap_and_cskill = [self.tEdit_CustomStartMapName.toPlainText(),
                                   self.cBox_CustomDifficulty.currentText().split('skill ')[1].replace(')', '')]
+        extra_args = self.tEdit_CustomCommandPrompt.toPlainText()
         for mod in range(self.list_ActiveMods.count()):
             mods_to_launch_with.append(self.list_ActiveMods.item(mod).text())
 
@@ -455,42 +560,46 @@ class MainWindow(QtWidgets.QMainWindow):
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
                                                       mods_to_launch_with, True, self.ActiveArgs,
-                                                      [getted_cmap_and_cskill[0], ''])
+                                                      [getted_cmap_and_cskill[0], ''], extra_args)
                 case 2:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
                                                       mods_to_launch_with, True, self.ActiveArgs,
-                                                      ['', getted_cmap_and_cskill[1]])
+                                                      ['', getted_cmap_and_cskill[1]], extra_args)
                 case 3:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
                                                       mods_to_launch_with, True, self.ActiveArgs,
-                                                      [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]])
+                                                      [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]],
+                                                      extra_args)
                 case _:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
                                                       mods_to_launch_with, True, self.ActiveArgs,
-                                                      ['', ''])
+                                                      ['', ''], extra_args)
         else:
             match run_code:
                 case 1:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
-                                                      [], False, self.ActiveArgs, [getted_cmap_and_cskill[0], ''])
+                                                      [], False, self.ActiveArgs, [getted_cmap_and_cskill[0], ''],
+                                                      extra_args)
                 case 2:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
-                                                      [], False, self.ActiveArgs, ['', getted_cmap_and_cskill[1]])
+                                                      [], False, self.ActiveArgs, ['', getted_cmap_and_cskill[1]],
+                                                      extra_args)
                 case 3:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
                                                       [], False, self.ActiveArgs,
-                                                      [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]])
+                                                      [getted_cmap_and_cskill[0], getted_cmap_and_cskill[1]],
+                                                      extra_args)
                 case _:
                     launchScript.launch_game_advanced(config['PATHS']['sourceport_executable'],
                                                       config['PATHS']['mod_folder'],
                                                       [], False, self.ActiveArgs,
-                                                      ['', ''])
+                                                      ['', ''], extra_args)
 
 
 # Making application to launch
@@ -506,10 +615,10 @@ trayApp.setToolTip('SNeicer\'s Doom Mod Manager')
 
 # Creating menus for tray
 trm_main = QtWidgets.QMenu()  # trm - tray menu, trma - tray menu action
-trm_presets = QtWidgets.QMenu("Launch from preset")
-trma_main_quit = QtWidgets.QAction("Quit")
-trma_main_windowVisibility = QtWidgets.QAction("Show/Hide Manager")
-trma_main_launchVanilla = QtWidgets.QAction("Launch vanilla (no mods)")
+trm_presets = QtWidgets.QMenu(MWindow.lang.trayMenu_launchFromPreset)
+trma_main_quit = QtWidgets.QAction(MWindow.lang.trayMenu_quit)
+trma_main_windowVisibility = QtWidgets.QAction(MWindow.lang.trayMenu_showHideManager)
+trma_main_launchVanilla = QtWidgets.QAction(MWindow.lang.trayMenu_launchVanilla)
 
 # Updating their contents
 update_tray_menu()

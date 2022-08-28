@@ -44,3 +44,17 @@ def get_custom_map_and_skill(preset_name):
         return [cmap, cskill]
     except:
         return ['', '']
+
+
+def get_extra_args(preset_name):
+    with open(f'ModPresets\\{preset_name}.dmmp', 'r') as PresetFile:
+        info_from_file = PresetFile.readlines()
+
+    try:
+        extra_args = ''
+        for line in info_from_file:
+            if ' #EXTRA: ' in line:
+                extra_args = line.split(' #EXTRA: ')[1].replace('\n', '')
+                return extra_args
+    except:
+        return ''
