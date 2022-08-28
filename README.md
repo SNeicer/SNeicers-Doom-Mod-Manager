@@ -1,7 +1,7 @@
 # SNeicers Doom Mod Manager
 Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source ports are not tested yet)**
 
-**Upd from 08/21/22 - Sorry for lack of updates, i was taking rest from all that coding this month, but final update will arrive pretty soon! (Possibly even in the end of this month!)**
+**Upd from 08/28/22 - Version 1.3 is out!
 
 ### Included features
 - Mod presets
@@ -25,19 +25,19 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 - ~~Hotkeys~~ (Implemented)
 - ~~Make ui more flexible~~ (No need)
 - ~~Additional settings (With saving them to presets)~~ (Implemented in version 1.2)
-- Customizable command prompt (Will be implemented in final version 1.3)
+- ~~Ability to add extra command arguments~~ (Implemented in final version 1.3)
 - ~~Refactor the code according to PEP8 recommendations~~ (Implemented in version 1.2)
 - ~~Icons for ui~~ (Implemented in version 1.2)
 - ~~Comments in code for better readability~~ (Implemented in version 1.2)
-- Multiple languages (Will be implemented in final version 1.3)
+- ~~Multiple languages~~ (Implemented in final version 1.3)
 - ~~Autoupdater????~~ (No need)
-- Try to make everything more optimized and overall better
+- ~~Try to make everything more optimized and overall better~~ (i did what i could xd )
 
 ### Screenshots
 
-![изображение](https://user-images.githubusercontent.com/46260745/178967670-97b9a4b0-83c9-49a3-a51e-6e8468c08972.png)
-![изображение](https://user-images.githubusercontent.com/46260745/178967722-564cc3be-00a7-4e99-902c-c54f66a2c1c7.png)
-![изображение](https://user-images.githubusercontent.com/46260745/173069188-decf85bb-3b15-4e7f-b57d-8e63b8c58581.png)
+![изображение](https://user-images.githubusercontent.com/46260745/187090253-839bedbf-73e1-4fb7-835e-6c38519825a2.png)
+![изображение](https://user-images.githubusercontent.com/46260745/187090214-acfb6469-3104-43e6-90db-f93e65dd3de8.png)
+![изображение](https://user-images.githubusercontent.com/46260745/187090294-485e7165-b03c-4d74-90b1-43ac70a04c44.png)
 
 <hr>
 
