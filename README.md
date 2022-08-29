@@ -1,7 +1,7 @@
 # SNeicers Doom Mod Manager
 Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source ports are not tested yet)**
 
-**Upd from 08/28/22 - Version 1.3 is out!
+**Upd from 08/28/22 - Version 1.3 is out!**
 
 ### Included features
 - Mod presets
