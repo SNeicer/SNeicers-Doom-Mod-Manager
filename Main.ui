@@ -72,9 +72,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>410</y>
-        <width>91</width>
-        <height>16</height>
+        <y>406</y>
+        <width>341</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -203,9 +203,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>470</y>
-        <width>91</width>
-        <height>16</height>
+        <y>466</y>
+        <width>381</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -268,7 +268,7 @@
        <rect>
         <x>10</x>
         <y>140</y>
-        <width>451</width>
+        <width>541</width>
         <height>21</height>
        </rect>
       </property>
@@ -281,7 +281,7 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>321</width>
+        <width>521</width>
         <height>21</height>
        </rect>
       </property>
@@ -294,7 +294,7 @@
        <rect>
         <x>10</x>
         <y>80</y>
-        <width>181</width>
+        <width>501</width>
         <height>21</height>
        </rect>
       </property>
@@ -307,7 +307,7 @@
        <rect>
         <x>10</x>
         <y>50</y>
-        <width>351</width>
+        <width>511</width>
         <height>21</height>
        </rect>
       </property>
@@ -320,7 +320,7 @@
        <rect>
         <x>10</x>
         <y>110</y>
-        <width>321</width>
+        <width>531</width>
         <height>21</height>
        </rect>
       </property>
@@ -453,12 +453,12 @@
        </rect>
       </property>
       <property name="text">
-       <string>Command Prompt (WIP and currently not working!)</string>
+       <string>Extra cmd parameters:</string>
       </property>
      </widget>
      <widget class="QTextEdit" name="tEdit_CustomCommandPrompt">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -469,34 +469,43 @@
        </rect>
       </property>
      </widget>
-     <widget class="QCheckBox" name="check_SaveAdditional">
+     <widget class="QWidget" name="verticalLayoutWidget">
       <property name="geometry">
        <rect>
-        <x>200</x>
-        <y>270</y>
-        <width>191</width>
-        <height>31</height>
+        <x>90</x>
+        <y>280</y>
+        <width>431</width>
+        <height>41</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Save additional settings in preset</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="check_SaveCommandPrompt">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>130</x>
-        <y>296</y>
-        <width>321</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Save current launch command prompt instead of mods (WIP)</string>
-      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="check_SaveAdditional">
+         <property name="text">
+          <string>Save additional settings in preset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_SaveCommandPrompt">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Save extra cmd parameters in preset</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </widget>
@@ -605,18 +614,54 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>590</y>
+      <y>580</y>
       <width>171</width>
-      <height>61</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;SNeicer - 2022&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Created using python and PyQt5&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;SNeicer - 2022&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;Created using Python and PyQt5&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
     </property>
     <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cBox_language">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>630</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>English</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Russian</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_language">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>630</y>
+      <width>58</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Language: </string>
+    </property>
+    <property name="wordWrap">
      <bool>false</bool>
     </property>
    </widget>
