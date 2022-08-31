@@ -47,6 +47,6 @@ Discord: SNeicer#1342
 EMail: b2jnz7hlw@mozmail.com
 
 ### Copyright (Icons)
-All icons ui icons from <a href="https:\\icons8.com">icons8</a>
+All ui icons from <a href="https:\\icons8.com">icons8</a>
 
 Tray icon from <a href="https://www.flaticon.com">flaticon</a>
