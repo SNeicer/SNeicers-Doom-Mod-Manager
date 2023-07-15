@@ -6,7 +6,7 @@ Mod manager for doom with tray functionality **(Mostly for GZDoom. Other source 
 ### Included features
 - Mod presets
 - Ability to launch modded/unmodded doom from tray
-- Customizable ui (Use QtDesigner for that, see the wiki for table elements and their names)
+- Customizable ui (Use QtDesigner for that)
 - Hotkeys
 - Additional settings (Arguments) and saving them in presets
 
